@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Code Tracker",
+  "version": "1.0.0",
+  "description": "Track and organize coding problems from LeetCode, CodeChef, HackerEarth, and HackerRank",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://leetcode.com/*",
+    "https://www.codechef.com/*",
+    "https://www.hackerearth.com/*",
+    "https://www.hackerrank.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Code Tracker",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://leetcode.com/*",
+        "https://www.codechef.com/*",
+        "https://www.hackerearth.com/*",
+        "https://www.hackerrank.com/*"
+      ],
+      "js": ["js/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "js/background.js"
+  }
+}

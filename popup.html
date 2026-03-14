@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --bg2: #0f1525;
+      --bg3: #141c30;
+      --border: #1e2d4a;
+      --border2: #243550;
+      --accent: #00d4ff;
+      --accent2: #7c3aed;
+      --accent3: #10b981;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --easy: #10b981;
+      --medium: #f59e0b;
+      --hard: #ef4444;
+      --lc: #f89f1b;
+      --cc: #5b4638;
+      --he: #44a8c5;
+      --hr: #00ea64;
+      --radius: 10px;
+      --radius2: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 420px;
+      min-height: 580px;
+      max-height: 600px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #0f1525 0%, #141c30 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px 0;
+      position: relative;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-sub {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .problem-count-badge {
+      margin-left: auto;
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.2);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 2px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 4px;
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .tab-btn .tab-icon { font-size: 15px; }
+
+    .tab-btn:hover { color: var(--text2); }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* CONTENT AREA */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent;
+    }
+
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .tab-panel { display: none; padding: 14px 16px; }
+    .tab-panel.active { display: block; }
+
+    /* FORM ELEMENTS */
+    .form-group { margin-bottom: 10px; }
+
+    label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"], input[type="url"], select, textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="url"]:focus,
+    select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0,212,255,0.1);
+    }
+
+    select { cursor: pointer; }
+    select option { background: var(--bg3); }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+      max-height: 120px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* GRID FORM */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* SCAN BUTTON */
+    .scan-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(124,58,237,0.05));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      margin-bottom: 14px;
+    }
+
+    .scan-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .scan-text { flex: 1; }
+    .scan-text strong { display: block; font-size: 12px; color: var(--text); }
+    .scan-text span { font-size: 10px; color: var(--text3); }
+
+    .scan-status {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: rgba(0,212,255,0.1);
+      color: var(--accent);
+      display: none;
+    }
+
+    .scan-status.show { display: block; }
+    .scan-status.error { background: rgba(239,68,68,0.1); color: var(--hard); }
+    .scan-status.success { background: rgba(16,185,129,0.1); color: var(--easy); }
+
+    /* BUTTONS */
+    .btn {
+      padding: 8px 14px;
+      border-radius: var(--radius2);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      color: #000;
+      width: 100%;
+      justify-content: center;
+      font-size: 13px;
+      padding: 10px;
+    }
+
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-scan {
+      background: linear-gradient(135deg, var(--accent2), #9333ea);
+      color: #fff;
+      font-size: 11px;
+      padding: 6px 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-scan:hover { filter: brightness(1.1); }
+
+    .btn-danger {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: var(--hard);
+    }
+
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+    }
+
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* DIFFICULTY BADGE */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-easy { background: rgba(16,185,129,0.15); color: var(--easy); }
+    .badge-medium { background: rgba(245,158,11,0.15); color: var(--medium); }
+    .badge-hard { background: rgba(239,68,68,0.15); color: var(--hard); }
+
+    /* PLATFORM BADGE */
+    .plat-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .plat-lc { background: rgba(248,159,27,0.15); color: var(--lc); }
+    .plat-cc { background: rgba(91,70,56,0.3); color: #c4a882; }
+    .plat-he { background: rgba(68,168,197,0.15); color: var(--he); }
+    .plat-hr { background: rgba(0,234,100,0.15); color: var(--hr); }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* FILTERS */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+
+    .filter-btn {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text3);
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover { border-color: var(--border2); color: var(--text2); }
+    .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.08); }
+    .filter-btn.easy.active { border-color: var(--easy); color: var(--easy); background: rgba(16,185,129,0.08); }
+    .filter-btn.medium.active { border-color: var(--medium); color: var(--medium); background: rgba(245,158,11,0.08); }
+    .filter-btn.hard.active { border-color: var(--hard); color: var(--hard); background: rgba(239,68,68,0.08); }
+
+    /* PROBLEM CARD */
+    .problem-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+    }
+
+    .problem-card.easy::before { background: var(--easy); }
+    .problem-card.medium::before { background: var(--medium); }
+    .problem-card.hard::before { background: var(--hard); }
+
+    .problem-card:hover {
+      border-color: var(--border2);
+      transform: translateX(2px);
+      background: #182035;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .card-topic {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-date {
+      font-size: 9px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-actions .btn {
+      flex: 1;
+      justify-content: center;
+      font-size: 10px;
+      padding: 5px 8px;
+    }
+
+    /* EXPANDED CARD */
+    .card-expanded {
+      display: none;
+    }
+
+    .card-expanded.show {
+      display: block;
+    }
+
+    .code-display {
+      background: #060d1a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      padding: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text2);
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 120px;
+      overflow-y: auto;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .notes-display {
+      background: rgba(124,58,237,0.05);
+      border: 1px solid rgba(124,58,237,0.15);
+      border-radius: var(--radius2);
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--text2);
+      line-height: 1.5;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .plat-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .plat-stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .plat-stat-name {
+      font-size: 11px;
+      font-weight: 600;
+      width: 90px;
+      flex-shrink: 0;
+    }
+
+    .plat-stat-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--bg3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .plat-stat-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+    }
+
+    .plat-stat-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text2);
+      width: 24px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .diff-stats {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .diff-stat-card {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      padding: 10px;
+      text-align: center;
+    }
+
+    .diff-stat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .diff-stat-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* ACTIVITY CHART */
+    .activity-chart {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .activity-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 50px;
+      margin-top: 10px;
+    }
+
+    .activity-bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      height: 100%;
+    }
+
+    .activity-bar {
+      width: 100%;
+      border-radius: 2px 2px 0 0;
+      background: linear-gradient(to top, var(--accent2), var(--accent));
+      min-height: 2px;
+      transition: height 0.5s ease;
+    }
+
+    .activity-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: var(--text3);
+      white-space: nowrap;
+    }
+
+    /* MORE TAB */
+    .more-section {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .more-section h3 {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .more-section p {
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .version-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text3);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-size: 11px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      z-index: 9999;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: var(--easy); color: var(--easy); }
+    .toast.error { border-color: var(--hard); color: var(--hard); }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text3);
+    }
+
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
+    .empty-state p { font-size: 12px; line-height: 1.6; }
+
+    /* TOPIC CHIPS */
+    .topic-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .topic-chip {
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.2);
+      color: #a78bfa;
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color 0.2s;
+    }
+
+    .delete-btn:hover { color: var(--hard); }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    /* CONFIRM MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 20px;
+      max-width: 280px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal h3 { font-size: 14px; margin-bottom: 8px; }
+    .modal p { font-size: 11px; color: var(--text3); margin-bottom: 16px; line-height: 1.5; }
+
+    .modal-actions { display: flex; gap: 8px; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">CT</div>
+      <div>
+        <div class="header-title">Code Tracker</div>
+        <div class="header-sub">Problem Manager</div>
+      </div>
+      <div class="problem-count-badge" id="problemCountBadge">0 solved</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="add">
+        <span class="tab-icon">➕</span>ADD
+      </button>
+      <button class="tab-btn" data-tab="history">
+        <span class="tab-icon">📚</span>HISTORY
+      </button>
+      <button class="tab-btn" data-tab="stats">
+        <span class="tab-icon">📊</span>STATS
+      </button>
+      <button class="tab-btn" data-tab="more">
+        <span class="tab-icon">⚙️</span>MORE
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ADD TAB -->
+    <div class="tab-panel active" id="tab-add">
+
+      <!-- Instant Scan -->
+      <div class="scan-bar">
+        <div class="scan-icon">⚡</div>
+        <div class="scan-text">
+          <strong>Instant Scan</strong>
+          <span>Auto-detect from current coding page</span>
+        </div>
+        <span class="scan-status" id="scanStatus"></span>
+        <button class="btn btn-scan" id="scanBtn">Scan</button>
+      </div>
+
+      <div class="section-title">Problem Details</div>
+
+      <div class="form-group">
+        <label>Problem Title *</label>
+        <input type="text" id="probTitle" placeholder="e.g. Two Sum" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Platform *</label>
+          <select id="probPlatform">
+            <option value="">Select...</option>
+            <option value="LeetCode">LeetCode</option>
+            <option value="CodeChef">CodeChef</option>
+            <option value="HackerEarth">HackerEarth</option>
+            <option value="HackerRank">HackerRank</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Difficulty *</label>
+          <select id="probDifficulty">
+            <option value="">Select...</option>
+            <option value="Easy">🟢 Easy</option>
+            <option value="Medium">🟡 Medium</option>
+            <option value="Hard">🔴 Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Topic / Tag</label>
+        <input type="text" id="probTopic" placeholder="e.g. Arrays, DP, Graph, Binary Search..." />
+      </div>
+
+      <div class="form-group">
+        <label>Problem URL</label>
+        <input type="url" id="probUrl" placeholder="https://..." />
+      </div>
+
+      <div class="form-group">
+        <label>📝 Notes</label>
+        <textarea id="probNotes" placeholder="Key observations, approach, patterns to remember..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" id="saveBtn">
+        ✅ Save Problem
+      </button>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div class="tab-panel" id="tab-history">
+      <div class="filters" id="platformFilters">
+        <button class="filter-btn active" data-filter="all" data-type="platform">All</button>
+        <button class="filter-btn" data-filter="LeetCode" data-type="platform">LeetCode</button>
+        <button class="filter-btn" data-filter="CodeChef" data-type="platform">CodeChef</button>
+        <button class="filter-btn" data-filter="HackerEarth" data-type="platform">HackerEarth</button>
+        <button class="filter-btn" data-filter="HackerRank" data-type="platform">HackerRank</button>
+      </div>
+      <div class="filters" id="diffFilters">
+        <button class="filter-btn active" data-filter="all" data-type="difficulty">All</button>
+        <button class="filter-btn easy" data-filter="Easy" data-type="difficulty">Easy</button>
+        <button class="filter-btn medium" data-filter="Medium" data-type="difficulty">Medium</button>
+        <button class="filter-btn hard" data-filter="Hard" data-type="difficulty">Hard</button>
+      </div>
+      <div id="problemList">
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <p>No problems saved yet.<br />Use the ADD tab to track problems.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS TAB -->
+    <div class="tab-panel" id="tab-stats">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="statTotal" style="color: var(--accent)">0</div>
+          <div class="stat-label">Total Solved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statStreak" style="color: var(--accent2)">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+      </div>
+
+      <div class="section-title">By Difficulty</div>
+      <div class="diff-stats">
+        <div class="diff-stat-card">
+          <div class="diff-stat-num" style="color: var(--easy)" id="statEasy">0</div>
+          <div class="diff-stat-label" style="color: var(--easy)">Easy</div>
+        </div>
+        <div class="diff-stat-card">
+          <div class="diff-stat-num" style="color: var(--medium)" id="statMedium">0</div>
+          <div class="diff-stat-label" style="color: var(--medium)">Medium</div>
+        </div>
+        <div class="diff-stat-card">
+          <div class="diff-stat-num" style="color: var(--hard)" id="statHard">0</div>
+          <div class="diff-stat-label" style="color: var(--hard)">Hard</div>
+        </div>
+      </div>
+
+      <div class="section-title">By Platform</div>
+      <div class="plat-stats" id="platStats"></div>
+
+      <div class="section-title">Last 7 Days Activity</div>
+      <div class="activity-chart">
+        <div class="activity-bars" id="activityBars"></div>
+      </div>
+
+      <div class="section-title">Top Topics</div>
+      <div class="topic-chips" id="topicChips">
+        <span style="font-size:11px;color:var(--text3)">No data yet</span>
+      </div>
+    </div>
+
+    <!-- MORE TAB -->
+    <div class="tab-panel" id="tab-more">
+      <div class="more-section">
+        <div class="version-tag">v1.0.0</div>
+        <h3>Code Tracker</h3>
+        <p>Your personal coding problem organizer. Track problems from LeetCode, CodeChef, HackerEarth, and HackerRank all in one place.</p>
+      </div>
+
+      <div class="more-section">
+        <h3>🗑️ Clear All Data</h3>
+        <p>This will permanently delete all your saved problems, notes, and statistics. This action cannot be undone.</p>
+        <button class="btn btn-danger" id="clearAllBtn" style="width:100%;justify-content:center;">
+          🗑️ Clear All Problems
+        </button>
+      </div>
+
+      <div class="more-section">
+        <h3>📖 How to Use</h3>
+        <p>
+          1. Open a problem on any supported platform<br/>
+          2. Click <strong>⚡ Instant Scan</strong> in the ADD tab<br/>
+          3. Fill in any missing details + add your notes<br/>
+          4. Save and review in the HISTORY tab
+        </p>
+      </div>
+
+      <div class="more-section">
+        <h3>🔗 Supported Platforms</h3>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+          <span class="plat-badge plat-lc">LeetCode</span>
+          <span class="plat-badge plat-cc">CodeChef</span>
+          <span class="plat-badge plat-he">HackerEarth</span>
+          <span class="plat-badge plat-hr">HackerRank</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <h3>⚠️ Clear All Data?</h3>
+      <p>This will permanently delete all saved problems and cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="cancelClear">Cancel</button>
+        <button class="btn btn-danger" id="confirmClear">Delete All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/popup.js"></script>
+</body>
+</html>
